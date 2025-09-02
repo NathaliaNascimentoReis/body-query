@@ -12,7 +12,7 @@ app.use(express.json());
 
 // Carregar variáveis de ambiente e definir constante para porta do servidor
 dotenv.config();
-const serverPort = process.env.PORT || 3001;
+const serverPort = process.env.PORT || 3000;
 
 // Rota principal GET para "/"
 app.get("/", (req, res) => {
@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 
 // Rota de varinhas com filtro query
 app.get("/varinhas", (req, res) => {
-  const { material, nucleo, comprimento} = req.query;
+  const { material, nucleo, comprimento } = req.query;
   let resultado = varinhas;
 
   if (material) {
@@ -30,7 +30,7 @@ app.get("/varinhas", (req, res) => {
     );
   }
 
-    if (comprimento) {
+  if (comprimento) {
     resultado = resultado.filter((b) =>
       b.comprimento.toLowerCase().includes(comprimento.toLowerCase())
     );
@@ -53,7 +53,7 @@ app.get("/animais", (req, res) => {
   const { nome, tipo } = req.query;
   let resultado = animais;
 
-if (nome) {
+  if (nome) {
     resultado = resultado.filter((b) =>
       b.nome.toLowerCase().includes(nome.toLowerCase())
     );
@@ -99,11 +99,11 @@ app.get("/bruxos", (req, res) => {
   const { casa, ano, especialidade, nome } = req.query;
   let resultado = bruxos;
 
-if (!nome || !casa) {
-  res.status(404).json({
-    erro: "Nome e casa são obrigatórios!"
-  })
-}
+  if (!nome || !casa) {
+    res.status(404).json({
+      erro: "Nome e casa são obrigatórios!",
+    });
+  }
 
   if (casa) {
     resultado = resultado.filter((b) =>
@@ -131,13 +131,12 @@ if (!nome || !casa) {
     total: resultado.length,
     data: resultado,
   });
-  
+
   if (!nome || !casa) {
     res.status(4040).json({
-      "erro": "Nome e casa são obrigatórios!"
-    })
+      erro: "Nome e casa são obrigatórios!",
+    });
   }
-
 });
 
 // Rota para criar Bruxo
@@ -155,7 +154,7 @@ app.post("/bruxos", (req, res) => {
   }
 
   const novoBruxo = {
-    id: bruxos.length ++,
+    id: bruxos.length++,
     nome,
     casa: casa,
     ano: parseInt(ano),
@@ -178,20 +177,21 @@ app.post("/bruxos", (req, res) => {
 
 // Rota para criar varinha
 app.post("/varinhas", (req, res) => {
-  const { material, nucleo, comprimento} = req.body;
+  const { material, nucleo, comprimento } = req.body;
 
   if (!material || !nucleo || !comprimento) {
     return res.status(404).json({
       sucess: false,
-      message: "Nucleo, material e comprimento são obrigatórios para uma varinha!",
+      message:
+        "Nucleo, material e comprimento são obrigatórios para uma varinha!",
     });
   }
 
   const novaVarinha = {
-    id: varinhas.length ++,
+    id: varinhas.length++,
     material,
     nucleo,
-    comprimento
+    comprimento,
   };
 
   // adicionar na lista
@@ -204,9 +204,51 @@ app.post("/varinhas", (req, res) => {
   });
 });
 
+// ATIVIDADE BôNUS
+app.get("/stats", (req, res) => {
+  const bruxosPorCasa = {};
+
+  // A nova variável (bruxo) a cada loop recebe todos os objetos do array
+  for (const bruxo of bruxos) {
+    if (bruxosPorCasa[bruxo.casa]) {
+      // agora, o código verifica se o nome da casa já existe na contagem. Se já existir, quer dizer que já tem bruxos nessa casa, então soma 1
+      bruxosPorCasa[bruxo.casa]++;
+    } else {
+      // se não existem outras casas com esse nome, então é a primeira vez que ela aparece, atribuindo o vlaor 1
+      bruxosPorCasa[bruxo.casa] = 1;
+    }
+  }
+
+  const materiaisDeVarinha = {};
+
+  // percorrendo os objetos
+  for (const varinha of varinhas) {
+    // compara a contagem atual com aquela com mais registros
+    if (materiaisDeVarinha[varinha.material]) {
+      // se a contagem atual foi a maior, as variáveis serão atualizadas com o novo valor e o nome do material
+      materiaisDeVarinha[varinha.material] += 1;
+    } else {
+      materiaisDeVarinha[varinha.material] = 1;
+    }
+  }
+
+  let materialMaisComum;
+  let materialQuantoSeRepete = 0;
+
+  for (const material in materiaisDeVarinha) {
+    if (materiaisDeVarinha[material] > materialQuantoSeRepete) {
+      materialQuantoSeRepete = materiaisDeVarinha[material];
+      materialMaisComum = material;
+    }
+  }
+
+  res.status(200).json({
+    bruxosPorCasa,
+    materialDeVarinhaMaisComum: materialMaisComum,
+  });
+});
+
 // Iniciar servidor escutando na porta definida
 app.listen(serverPort, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${serverPort} 🚀`);
 });
-
-
