@@ -85,4 +85,3 @@ const pocoes = [
 ];
 
 export default {bruxos, casas, varinhas, animais, pocoes};
-

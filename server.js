@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 // Importar Lista de Array
 import dados from "./src/data/dados.js";
-const { bruxos, varinhas, pocoes } = dados;
+const { bruxos, varinhas, pocoes, animais } = dados;
 
 // Criar aplicação com Express e configurar para aceitar JSON
 const app = express();
@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 
 // Rota de varinhas com filtro query
 app.get("/varinhas", (req, res) => {
-  const { material, nucleo } = req.query;
+  const { material, nucleo, comprimento} = req.query;
   let resultado = varinhas;
 
   if (material) {
@@ -30,9 +30,38 @@ app.get("/varinhas", (req, res) => {
     );
   }
 
+    if (comprimento) {
+    resultado = resultado.filter((b) =>
+      b.comprimento.toLowerCase().includes(comprimento.toLowerCase())
+    );
+  }
+
   if (nucleo) {
     resultado = resultado.filter((b) =>
       b.nucleo.toLowerCase().includes(nucleo.toLowerCase())
+    );
+  }
+
+  res.status(200).json({
+    total: resultado.length,
+    data: resultado,
+  });
+});
+
+// Rota de animais com filtro query
+app.get("/animais", (req, res) => {
+  const { nome, tipo } = req.query;
+  let resultado = animais;
+
+if (nome) {
+    resultado = resultado.filter((b) =>
+      b.nome.toLowerCase().includes(nome.toLowerCase())
+    );
+  }
+
+  if (tipo) {
+    resultado = resultado.filter((b) =>
+      b.tipo.toLowerCase().includes(tipo.toLowerCase())
     );
   }
 
@@ -70,6 +99,12 @@ app.get("/bruxos", (req, res) => {
   const { casa, ano, especialidade, nome } = req.query;
   let resultado = bruxos;
 
+if (!nome || !casa) {
+  res.status(404).json({
+    erro: "Nome e casa são obrigatórios!"
+  })
+}
+
   if (casa) {
     resultado = resultado.filter((b) =>
       b.casa.toLowerCase().includes(casa.toLowerCase())
@@ -96,6 +131,13 @@ app.get("/bruxos", (req, res) => {
     total: resultado.length,
     data: resultado,
   });
+  
+  if (!nome || !casa) {
+    res.status(4040).json({
+      "erro": "Nome e casa são obrigatórios!"
+    })
+  }
+
 });
 
 // Rota para criar Bruxo
@@ -113,7 +155,7 @@ app.post("/bruxos", (req, res) => {
   }
 
   const novoBruxo = {
-    id: bruxos.length + 1,
+    id: bruxos.length ++,
     nome,
     casa: casa,
     ano: parseInt(ano),
@@ -134,7 +176,37 @@ app.post("/bruxos", (req, res) => {
   });
 });
 
+// Rota para criar varinha
+app.post("/varinhas", (req, res) => {
+  const { material, nucleo, comprimento} = req.body;
+
+  if (!material || !nucleo || !comprimento) {
+    return res.status(404).json({
+      sucess: false,
+      message: "Nucleo, material e comprimento são obrigatórios para uma varinha!",
+    });
+  }
+
+  const novaVarinha = {
+    id: varinhas.length ++,
+    material,
+    nucleo,
+    comprimento
+  };
+
+  // adicionar na lista
+  varinhas.push(novaVarinha);
+
+  res.status(200).json({
+    sucess: true,
+    message: "Nova varinha adicionada!",
+    data: novaVarinha,
+  });
+});
+
 // Iniciar servidor escutando na porta definida
 app.listen(serverPort, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${serverPort} 🚀`);
 });
+
+

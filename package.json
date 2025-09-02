@@ -9,7 +9,8 @@
     "dev": "nodemon server.js"
   },
   "keywords": [
-    "JSON", "SENAI"
+    "JSON",
+    "SENAI"
   ],
   "author": "Nathalia Nascimento Reis",
   "license": "MIT",
